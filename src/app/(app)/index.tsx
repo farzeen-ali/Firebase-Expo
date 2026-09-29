@@ -1,5 +1,6 @@
 import * as Device from 'expo-device';
-import { Platform, StyleSheet } from 'react-native';
+import { useState } from 'react';
+import { Alert, Platform, Pressable, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { AnimatedIcon } from '@/components/animated-icon';
@@ -8,6 +9,8 @@ import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { WebBadge } from '@/components/web-badge';
 import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
+import { useAuth } from '@/context/auth-context';
+import { getAuthErrorMessage } from '@/lib/auth-errors';
 
 function getDevMenuHint() {
   if (Platform.OS === 'web') {
@@ -29,6 +32,20 @@ function getDevMenuHint() {
 }
 
 export default function HomeScreen() {
+  const { user, signOut } = useAuth();
+  const [signingOut, setSigningOut] = useState(false);
+
+  async function handleSignOut() {
+    setSigningOut(true);
+    try {
+      await signOut();
+    } catch (error) {
+      Alert.alert('Sign out failed', getAuthErrorMessage(error));
+    } finally {
+      setSigningOut(false);
+    }
+  }
+
   return (
     <ThemedView style={styles.container}>
       <SafeAreaView style={styles.safeArea}>
@@ -39,6 +56,24 @@ export default function HomeScreen() {
           </ThemedText>
         </ThemedView>
 
+        <ThemedView type="backgroundElement" style={styles.accountCard}>
+          <View style={styles.accountCopy}>
+            <ThemedText type="small" themeColor="textSecondary">
+              Signed in as
+            </ThemedText>
+            <ThemedText type="smallBold">{user?.email ?? 'your account'}</ThemedText>
+          </View>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Sign out"
+            accessibilityState={{ disabled: signingOut, busy: signingOut }}
+            disabled={signingOut}
+            onPress={() => void handleSignOut()}
+            style={({ pressed }) => [styles.signOutButton, pressed && styles.pressed]}>
+            <ThemedText type="linkPrimary">{signingOut ? 'Signing out' : 'Sign out'}</ThemedText>
+          </Pressable>
+        </ThemedView>
+
         <ThemedText type="code" style={styles.code}>
           get started
         </ThemedText>
@@ -46,7 +81,7 @@ export default function HomeScreen() {
         <ThemedView type="backgroundElement" style={styles.stepContainer}>
           <HintRow
             title="Try editing"
-            hint={<ThemedText type="code">src/app/index.tsx</ThemedText>}
+            hint={<ThemedText type="code">src/app/(app)/index.tsx</ThemedText>}
           />
           <HintRow title="Dev tools" hint={getDevMenuHint()} />
           <HintRow
@@ -84,6 +119,28 @@ const styles = StyleSheet.create({
   },
   title: {
     textAlign: 'center',
+  },
+  accountCard: {
+    alignSelf: 'stretch',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: Spacing.three,
+    paddingHorizontal: Spacing.three,
+    paddingVertical: Spacing.three,
+    borderRadius: Spacing.four,
+  },
+  accountCopy: {
+    flex: 1,
+    gap: Spacing.half,
+  },
+  signOutButton: {
+    minHeight: 44,
+    justifyContent: 'center',
+    paddingHorizontal: Spacing.two,
+  },
+  pressed: {
+    opacity: 0.7,
   },
   code: {
     textTransform: 'uppercase',
