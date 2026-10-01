@@ -1,5 +1,6 @@
 import { getApp, getApps, initializeApp, type FirebaseApp } from 'firebase/app';
 import type { Auth } from 'firebase/auth';
+import { getFirestore, type Firestore } from 'firebase/firestore';
 
 import { createAuth } from '@/config/auth-persistence';
 
@@ -47,4 +48,7 @@ function createFirebaseApp(): FirebaseApp {
     : getApp();
 }
 
-export const auth: Auth | null = firebaseConfigError ? null : createAuth(createFirebaseApp());
+const app: FirebaseApp | null = firebaseConfigError ? null : createFirebaseApp();
+
+export const auth: Auth | null = app ? createAuth(app) : null;
+export const db: Firestore | null = app ? getFirestore(app) : null;
