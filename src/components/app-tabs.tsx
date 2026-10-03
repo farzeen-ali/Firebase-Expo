@@ -32,6 +32,11 @@ export default function AppTabs() {
         <NativeTabs.Trigger.Label>Notes</NativeTabs.Trigger.Label>
         <NativeTabs.Trigger.Icon sf="note.text" md="sticky_note_2" />
       </NativeTabs.Trigger>
+
+      <NativeTabs.Trigger name="chat">
+        <NativeTabs.Trigger.Label>Chat</NativeTabs.Trigger.Label>
+        <NativeTabs.Trigger.Icon sf="bubble.left.and.bubble.right" md="forum" />
+      </NativeTabs.Trigger>
     </NativeTabs>
   );
 }
